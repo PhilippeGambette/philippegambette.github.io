@@ -6,6 +6,7 @@
 body{font-family:'Calibri';}
 td{border: 1px solid black; text-align: center;}
 table{font-size:10pt;}
+tt{background-color:grey;}
 </style>
 </head><body>
 <h1>Comparaison de 15 versions de la 65<sup>e</sup> nouvelle de l'<i>Heptaméron</i> de Marguerite de Navarre <a href="https://collatex.net/demo/">avec CollateX</a></h1>
@@ -21,7 +22,7 @@ table{font-size:10pt;}
 <h1>Tutoriel pour l'utilisation de MAFFT sur des textes littéraires</h1>
 <p>
 <ul>
-<li>formatage des fichiers : remplacer tous les signes de ponctuation par -, les -- par -, les - par ?, les é par e, à par a, etc., pour obtenir des textes contenant uniquement des mots constitués de caractères de a à z et séparés par un ? ;</li>
+<li>formatage des fichiers : remplacer tous les signes de ponctuation par <tt>-</tt>, les <tt>--</tt> par <tt>-</tt>, les <tt>-</tt> par <tt>?</tt>, les <tt>é</tt> par <tt>e</tt>, <tt>à</tt> par <tt>a</tt>, etc., pour obtenir des textes contenant uniquement des mots constitués de caractères de a à z et séparés par un ? ;</li>
 <li>pour obtenir un fichier d'entrée pour MAFFT : 1) chargement de chaque fichier ainsi formaté dans <a href="http://genedoc.software.informer.com/2.7/">GeneDoc</a> (menu "File", "New" puis "File", "Import", puis sélectionner le type "Text" puis cliquer sur "Import" pour chaque fichier texte chargé, puis enfin sur "Done") ; 2) sauvegarde du fichier combinant tous les fichiers, au format MSF, multiple sequence file (menu File, Saves as...) : obtention du fichier <a href="./Heptameron.msf">Heptameron.msf</a> ;</li>
 <li>envoi de ce fichier dans <a href="https://www.ebi.ac.uk/Tools/msa/mafft/">la version web de MAFFT</a> (output format : Pearson/FASTA, More options -> Matrix : NONE) ;</li>
 <li>télécharger <a href="./Heptameron-MAFFT-aln-fasta.txt">le fichier FASTA résultat</a>, y rechercher/remplacer les X majuscules par _ ;</li>
