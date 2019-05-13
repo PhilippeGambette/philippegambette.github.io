@@ -18,4 +18,18 @@ table{font-size:10pt;}
 <li>le <a href="./Heptameron-MAFFT.pdf">résultat de l'alignement réalisé par MAFFT et visualisé par GeneDoc</a> (<a href="./Heptameron.msf">fichier MSF source</a>, <a href="./Heptameron-MAFFT-aln-fasta.txt">fichier FASTA obtenu par MAFFT</a>).</li>
 </ul>
 </p>
+<h1>Tutoriel pour l'utilisation de MAFFT sur des textes littéraires</h1>
+<p>
+<ul>
+<li>formatage des fichiers : remplacer tous les signes de ponctuation par -, les -- par -, les - par ?, les é par e, à par a, etc., pour obtenir des textes contenant uniquement des mots constitués de caractères de a à z et séparés par un ? ;</li>
+<li>pour obtenir un fichier d'entrée pour MAFFT : 1) chargement de chaque fichier ainsi formaté dans <a href="http://genedoc.software.informer.com/2.7/">GeneDoc</a> (menu "File", "New" puis "File", "Import", puis sélectionner le type "Text" puis cliquer sur "Import" pour chaque fichier texte chargé, puis enfin sur "Done") ; 2) sauvegarde du fichier combinant tous les fichiers, au format MSF, multiple sequence file (menu File, Saves as...) : obtention du fichier <a href="./Heptameron.msf">Heptameron.msf</a> ;</li>
+<li>envoi de ce fichier dans <a href="https://www.ebi.ac.uk/Tools/msa/mafft/">la version web de MAFFT</a> (output format : Pearson/FASTA, More options -> Matrix : NONE) ;</li>
+<li>télécharger <a href="./Heptameron-MAFFT-aln-fasta.txt">le fichier FASTA résultat</a>, y rechercher/remplacer les X majuscules par _ ;</li>
+<li>ouvrir le fichier FASTA ainsi modifié dans GeneDoc par le menu "File", "Import" ;</li>
+<li>imprimer en PDF depuis GeneDoc (menu "File", "Print") pour obtenir <a href="./Heptameron-MAFFT.pdf">ce PDF</a>.</li>
+</ul>
+Référence de MAFFT : Katoh, Misawa, Kuma, Miyata (2002) <a href="https://doi.org/10.1093/nar/gkf436">MAFFT: a novel method for rapid multiple sequence alignment based on fast Fourier transform</a>, <i>Nucleic Acids Research</i> 30(14):3059-3066.
+
+</p>
+
 </body>
