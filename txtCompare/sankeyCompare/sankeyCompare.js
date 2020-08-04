@@ -238,6 +238,9 @@ function loadSankeyCompare(){
     $("#sourceData").attr("href",data[corpusNumber].sourceData);
     var texts = data[corpusNumber].texts;
     var ecart = data[corpusNumber].ecart;
+    var liensVersDroite = {};
+    var liensVersGauche = {};
+    var numPartieExtrait = {};
     
     // Initialisation
     var xLeft = 380;
@@ -300,24 +303,27 @@ function loadSankeyCompare(){
        ordonneeTextes["i"+texts[i][0]] = y;
        hauteurTextes["i"+texts[i][0]] = hauteurTexte;
        titreTextes["i"+texts[i][0]] = texts[i][3];
+       numPartieExtrait[texts[i][0]] = texts[i][2][0];
        var url = texts[i][6];
        
        if(texts[i][1] == recueils[0]){
           // Affichage du titre de l'extrait sur la gauche
           $("#label").html(texts[i][3]+"…");
-          $(".svg g").append('		<path fill="'+couleurs[numPartie]+'" d="M'+(xLeft-10)+' '+y+' H '+(xLeft)+' V '+(y-hauteurTexte)+' H '+(xLeft-10)+' L '+(xLeft-10)+' '+y+'">');          
+          $(".svg g").append('		<path id="r_'+texts[i][0]+'" fill="'+couleurs[numPartie]+'" d="M'+(xLeft-10)+' '+y+' H '+(xLeft)+' V '+(y-hauteurTexte)+' H '+(xLeft-10)+' L '+(xLeft-10)+' '+y+'">');          
           // Ajout d'un lien vers l'extrait
-          $(".svg g").append('    <a xlink:show="new" xlink:href="'+url+'" xlink:title="Accéder au texte…"><text x="'+(xLeft-parseInt($("#label").css("width"))-20)+'" y="'+(y)+'" fill="'+couleurs[numPartie]+'" font-size="'+hauteurParDefaut+'">'+texts[i][3]+'</text></a>');
+          $(".svg g").append('    <a xlink:show="new" xlink:href="'+url+'" xlink:title="Accéder au texte…"><text id="t_'+texts[i][0]+'" x="'+(xLeft-parseInt($("#label").css("width"))-20)+'" y="'+(y)+'" fill="'+couleurs[numPartie]+'" font-size="'+hauteurParDefaut+'">'+texts[i][3]+'</text></a>');
        } else {
           // Affichage du titre de l'extrait sur la droite
-          $(".svg g").append('		<path fill="'+couleurs[numPartie]+'" d="M'+(xRight+10)+' '+y+' H '+(xRight)+' V '+(y-hauteurTexte)+' H '+(xRight+10)+' L '+(xRight+10)+' '+y+'">');
+          $(".svg g").append('		<path id="r_'+texts[i][0]+'" fill="'+couleurs[numPartie]+'" d="M'+(xRight+10)+' '+y+' H '+(xRight)+' V '+(y-hauteurTexte)+' H '+(xRight+10)+' L '+(xRight+10)+' '+y+'">');
           // Ajout d'un lien vers l'extrait
-          $(".svg g").append('    <a xlink:show="new" xlink:href="'+url+'" xlink:title="Accéder au texte…"><text x="'+(xRight+20)+'" y="'+(y)+'" fill="'+couleurs[numPartie]+'" font-size="'+hauteurParDefaut+'">'+texts[i][3]+'</text></a>');       
+          $(".svg g").append('    <a xlink:show="new" xlink:href="'+url+'" xlink:title="Accéder au texte…"><text id="t_'+texts[i][0]+'" x="'+(xRight+20)+'" y="'+(y)+'" fill="'+couleurs[numPartie]+'" font-size="'+hauteurParDefaut+'">'+texts[i][3]+'</text></a>');       
 
           if(texts[i][5]!=""){
              // Ajout du lien entre l'extrait de droite et un extrait de gauche
              var y2 = ordonneeTextes["i"+texts[i][5]];
              var h2 = hauteurTextes["i"+texts[i][5]];
+             liensVersGauche[texts[i][0]]=texts[i][5];
+             liensVersDroite[texts[i][5]]=texts[i][0];
              var couleurLien = couleurTitresIdentiques;
              if (texts[i][3].toLowerCase() != titreTextes["i"+texts[i][5]].toLowerCase() ){
                 // Lien plus foncé entre des titres différents
@@ -335,6 +341,15 @@ function loadSankeyCompare(){
        hauteurMax = hauteurRecueils[1];
     }
     $("svg").attr("height",hauteurMax + hauteurParDefaut*3+2)
+    
+    // Affectation des couleurs du livre de droite à celui de gauche pour l'Heptaméron
+    if(corpusNumber == 0){
+       extraitsGauche = Object.keys(liensVersDroite);
+       extraitsGauche.forEach(function(e){
+          $("#t_"+e).attr("fill",$("#t_"+liensVersDroite[e]).attr("fill")).append("&rarr;"+numPartieExtrait[liensVersDroite[e]]).attr("x",parseInt($("#t_"+e).attr("x"))-10);
+          $("#r_"+e).attr("fill",$("#r_"+liensVersDroite[e]).attr("fill"));
+       });
+    };
     
     // Mise à jour de l'image SVG
     $(".svg").html($(".svg").html());
