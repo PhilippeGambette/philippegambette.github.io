@@ -241,6 +241,7 @@ function loadSankeyCompare(){
     var liensVersDroite = {};
     var liensVersGauche = {};
     var numPartieExtrait = {};
+    var nbPagesExtrait = {};
     
     // Initialisation
     var xLeft = 380;
@@ -304,6 +305,7 @@ function loadSankeyCompare(){
        hauteurTextes["i"+texts[i][0]] = hauteurTexte;
        titreTextes["i"+texts[i][0]] = texts[i][3];
        numPartieExtrait[texts[i][0]] = texts[i][2][0];
+       nbPagesExtrait[texts[i][0]] = texts[i][4];
        var url = texts[i][6];
        
        if(texts[i][1] == recueils[0]){
@@ -329,7 +331,7 @@ function loadSankeyCompare(){
                 // Lien plus foncé entre des titres différents
                 couleurLien = couleurTitresDifferents;
              }
-             $(".svg g").append('		<path class="lien" fill="'+couleurLien+'" d="M'+(xLeft)+','+y2+' C'+((xRight+xLeft)/2)+','+y2+' '+((xRight+xLeft)/2)+','+y+' '+(xRight)+','+y+' V '+(y-hauteurTexte)+' C'+((xRight+xLeft)/2)+','+(y-hauteurTexte)+' '+((xRight+xLeft)/2)+','+(y2-h2)+' '+(xLeft)+','+(y2-h2)+'"/>')
+             $(".svg g").append('		<a xlink:title="'+nbPagesExtrait[texts[i][5]]+' pages &rarr; '+texts[i][4]+' pages"><path class="lien" fill="'+couleurLien+'" d="M'+(xLeft)+','+y2+' C'+((xRight+xLeft)/2)+','+y2+' '+((xRight+xLeft)/2)+','+y+' '+(xRight)+','+y+' V '+(y-hauteurTexte)+' C'+((xRight+xLeft)/2)+','+(y-hauteurTexte)+' '+((xRight+xLeft)/2)+','+(y2-h2)+' '+(xLeft)+','+(y2-h2)+'"/></a>')
           }
        }
        i ++;
