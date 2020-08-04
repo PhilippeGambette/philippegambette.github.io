@@ -254,7 +254,7 @@ function loadSankeyCompare(){
     var hauteurTextes = {};
     var titreTextes = {}
     var recueils = [];
-    var couleurs = ["#DDDDDD","#55CCCC","#CC5555","#55CC55","#5555CC","#CC55CC","#55CCCC"];
+    var couleurs = ["#DDDDDD","#55CCCC","#CC5555","#55CC55","#5555CC","#CC55CC","#55CCCC","#5599EE","#EE5599"];
     var numPartie = 0;
     var partie = "";
     var y = hauteurParDefaut+10;
