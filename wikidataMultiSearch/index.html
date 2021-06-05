@@ -41,6 +41,7 @@ Cliquez sur les liens ci-dessous pour voir quelques exemples de recherches possi
 <li><a href="" id="demo-autrices">Femmes de lettres</a></li>
 <li><a href="" id="demo-substances">Substances chimiques</a></li>
 <li><a href="" id="demo-ouvrages">Titres d'ouvrages</a></li>
+<li><a href="" id="demo-champs">Identifiants Wikidata de communes appelées Champs en France</a></li>
 </ul>
 </section>
 
@@ -53,6 +54,10 @@ Marie de France
 Marguerite Duras
 Olympe de Gouges
 Marie-Catherine de Villedieu</textarea>
+<br><br>
+Chercher :<br>
+<input type="radio" name="form-type" id="form-id" value="id"><label for="form-id">par identifiant</form>
+<input type="radio" name="form-type" id="form-nom" value="nom" checked><label for="form-nom">par nom ou alias</form>
 <br><br>
 <label for="form-lang">Code de langue des éléments à rechercher :</label><br>
 <input type="text" id="form-lang" value="fr">
@@ -88,6 +93,8 @@ $("#demo-autrices").on("click",function(e){
    $("#form-lang").val("fr");
    $("#form-instanceOf").val("Q5");
    $("#form-properties").val("P18,P21,P27,P569");
+   $("#form-id").prop("checked",false);
+   $("#form-nom").prop("checked",true);
 });
 
 $("#demo-substances").on("click",function(e){
@@ -96,6 +103,8 @@ $("#demo-substances").on("click",function(e){
    $("#form-lang").val("fr");
    $("#form-instanceOf").val("Q27166344");
    $("#form-properties").val("P231,P274,P661,P662");
+   $("#form-id").prop("checked",false);
+   $("#form-nom").prop("checked",true);
 });
 
 $("#demo-ouvrages").on("click",function(e){
@@ -104,6 +113,17 @@ $("#demo-ouvrages").on("click",function(e){
    $("#form-lang").val("fr");
    $("#form-instanceOf").val("Q3331189");
    $("#form-properties").val("P50,P123,P291,P407,P577,P268,P996,P4258");
+   $("#form-id").prop("checked",false);
+   $("#form-nom").prop("checked",true);
+});
+
+$("#demo-champs").on("click",function(e){
+   e.preventDefault();
+   $("#form-list").val("Q242536\nQ978792\nQ536385\nQ117551\nQ1095803\nQ269276");
+   $("#form-lang").val("fr");
+   $("#form-properties").val("P625,P17,P18,P281,P856,P268,P1566");
+   $("#form-id").prop("checked",true);
+   $("#form-nom").prop("checked",false);
 });
 
 $("#form-button").on("click",function(){
@@ -124,21 +144,27 @@ function sendNextQuery(){
     // Build Wikidata query
     var endpointUrl = 'https://query.wikidata.org/sparql';
     var variables = "?item ?itemLabel";
-    var constraints = ' WHERE {\n' +
-    '  {?item rdfs:label "' + elements[0] + '"@' + $("#form-lang").val() + '} ' + 
+    var subject = "?item";
+    var focus = '  {?item rdfs:label "' + elements[0] + '"@' + $("#form-lang").val() + '} ' + 
     ' UNION {?item skos:altLabel "' + elements[0] + '"@' + $("#form-lang").val() + '}'
+    if($('input[name="form-type"]:checked').val()=="id"){
+       variables = "?itemlabel";
+       subject = 'wd:' + elements[0].replace("http://www.wikidata.org/entity/","");
+       focus = '  '+subject+' rdfs:label ?itemlabel';
+    }
+    var constraints = ' WHERE {\n' + focus
     //.\n'+
     //'  ?item wdt:P31/wdt:P279* wd:' + $("#form-instanceOf").val();
     properties.forEach(function(e){
       variables += " ?" + e + " ?" + e + "Label";
       constraints += ".\n" +
-        "  OPTIONAL{ ?item wdt:" + e + " ?" + e + "}";
+        "  OPTIONAL{ " + subject + " wdt:" + e + " ?" + e + "}";
     })
 	  sparqlQuery = "SELECT " + variables + constraints + ".\n" +
         "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"[AUTO_LANGUAGE]," + $("#form-lang").val() + "\". }\n" +
         "}\n" +
         "GROUP BY " + variables;
-    //console.log(sparqlQuery);
+    console.log(sparqlQuery);
     
     // Send Wikidata query and get results
     makeSPARQLQuery(endpointUrl, sparqlQuery, getWikidataResults)
@@ -162,10 +188,16 @@ function getWikidataResults(data){
 	  infos.forEach(function(elementInfos){
 	    // Test all results given by Wikidata, look for the one matching the highest number of expected properties
 	    var propertyNumber = 0;
-	    
-	    // Bonus if the name matches exactly
-	    if(elementInfos["itemLabel"].value.toLowerCase() == elements[0].toLowerCase()){
-	      propertyNumber ++;
+
+      // If we search by name and not by id
+      if($('input[name="form-type"]:checked').val()=="nom"){	    
+	      // Bonus if the name matches exactly
+	      if(elementInfos["itemLabel"].value.toLowerCase() == elements[0].toLowerCase()){
+	        propertyNumber ++;
+	      }
+	    } else {
+	      elementInfos["item"] = {"value":elements[0]};
+	      elementInfos["itemLabel"] = elementInfos["itemlabel"];
 	    }
 	    
 	    var tempResultLine = "<td>" + elementInfos["item"].value + "</td><td>" + elementInfos["itemLabel"].value + "</td>";
