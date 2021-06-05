@@ -152,7 +152,7 @@ function sendNextQuery(){
     if($('input[name="form-type"]:checked').val()=="id"){
        variables = "?itemlabel";
        subject = 'wd:' + elements[0].replace("http://www.wikidata.org/entity/","");
-       focus = '  '+subject+' rdfs:label ?itemlabel';
+       focus = '  '+subject+' rdfs:label ?itemlabel filter (lang(?itemlabel) = "fr").';
     }
     var constraints = ' WHERE {\n' + focus
     //.\n'+
