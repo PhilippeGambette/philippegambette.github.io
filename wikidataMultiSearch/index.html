@@ -78,6 +78,7 @@ Trop contraignant donc supprimé :
 
 <section>
 <h2>Résultats de la recherche</h2>
+<p><a href="" id="download">Télécharger le tableau ci-dessous</a></p>
 <table id="results">
 </table>
 </section>
@@ -182,6 +183,7 @@ function makeSPARQLQuery( endpointUrl, sparqlQuery, doneCallback ) {
 }
 
 function getWikidataResults(data){
+  console.log(data);
 	var infos = data.results.bindings;
 	var resultLine = "";
 	var bestPropertyNumber = -1;
@@ -230,9 +232,76 @@ function getWikidataResults(data){
 	// Send a new query after waiting for 2 seconds
 	elements.shift();
 	setTimeout(sendNextQuery,2000)
-	
+
 }
+
+// Create a string containing the current date of the form YYYY-MM-DD
+function buildDate(){
+   // Build date
+   var m = new Date(Date.now()).getMonth()+1;
+   if(m<10){
+      m="0"+m;
+   }
+   var d = new Date(Date.now()).getDate();
+   if(d<10){
+      d="0"+d;
+   }
+   return new Date(Date.now()).getFullYear()+"-"+m+"-"+d+"_"+new Date(Date.now()).getHours()+"h"+new Date(Date.now()).getMinutes();
+}
+
+/************************************/
+/* code below used to download the CSV file
+/* derived from the code by A.H. Bitubekk
+/* from https://stackoverflow.com/questions/14964035/how-to-export-javascript-array-info-to-csv-on-client-side
+/************************************/
+
+// Download link
+// Download the table containing the results
+$("#download").on("click",function(e){
+
+  // CSV file
+  var csvContent = '';
  
+  e.preventDefault();
+    
+  // Building the CSV from the table
+  // Each column is separated by "\t" and new line "\n" for next row
+  $("tr").each(function(n) {
+     var dString = "";
+     $(this).find("td,th").each(function(td){
+        dString += $(this).html().replace(/\t/ig,"") + "\t";
+     });
+     csvContent += dString + '\n';
+  });
+ 
+  // Save file
+  download(csvContent, 'download-'+buildDate()+'.csv', 'text/csv;encoding:utf-8');
+})
+
+// The download function takes a CSV string, the filename and mimeType as parameters
+// Scroll/look down at the bottom of this snippet to see how download is called
+function download(content, fileName, mimeType) {
+  var a = document.createElement('a');
+  mimeType = mimeType || 'application/octet-stream';
+
+  if (navigator.msSaveBlob) { // IE10
+    navigator.msSaveBlob(new Blob([content], {
+      type: mimeType
+    }), fileName);
+  } else if (URL && 'download' in a) { //html5 A[download]
+    a.href = URL.createObjectURL(new Blob([content], {
+      type: mimeType
+    }));
+    a.setAttribute('download', fileName);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+  }
+}
+/************************************/
+	 
 });
 
 </script>
