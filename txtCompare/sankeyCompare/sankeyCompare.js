@@ -33,9 +33,12 @@ $(document).ready(function(){
     })
 
 function loadSankeyCompare(){
-
     // Choix du corpus 
     var corpusNumber = $("#choix").val();
+
+    // Ajout du numéro de choix dans l'URL
+    window.history.pushState({site: 0}, '', "?id="+corpusNumber);
+
     $("#titreCourt").html(data[corpusNumber].titreCourt);
     $("#titreLong").html(data[corpusNumber].titreLong);
     $("#sourceData").attr("href",data[corpusNumber].sourceData);
@@ -133,7 +136,7 @@ function loadSankeyCompare(){
              //console.log("i"+texts[i][5])
              //console.log(titreTextes["i"+texts[i][5]])
              //console.log(titreTextes)
-             console.log(texts[i])
+             //console.log(texts[i])
              if (texts[i][3].toLowerCase() != titreTextes["i"+texts[i][5]].toLowerCase() ){
                 // Lien plus foncé entre des titres différents
                 couleurLien = couleurTitresDifferents;
@@ -678,12 +681,36 @@ function loadSankeyCompare(){
     $("#choix").html("");
     var numChoix = 0;
     while(numChoix < data.length){
-        console.log(data[numChoix])
+        //console.log(data[numChoix])
         $("#choix").append('<option value="' + numChoix + '">' + data[numChoix].option + '</option>')
         numChoix ++;
     }
 
-    $("#choix").val(0);
+    // Récupération des paramètres de l'URL
+    let choix = 0;
+    let urlSplit = window.location.href.split('?');
+    if(urlSplit.length > 1){
+       // L'URL contient effectivement des paramètres à récupérer
+       let urlParams = urlSplit[1];
+       let params = urlParams.split("&");
+       //console.log(params)
+       params.forEach(function(p){
+          // Parcours de la liste des paramètres
+          if(p.split("=")[0].toLowerCase() == "id"){
+             // Récupération de la valeur du paramètre id
+             choix = p.split("=")[1];
+             console.log(choix);
+          }
+       })
+       if(parseInt(choix) >= data.length){
+          choix = data.length - 1;
+       }
+    } else {
+        // Ajout du paramètre id=0 par défaut
+        window.location.href += '?id=0';
+    }
+
+    $("#choix").val(choix);
 
 loadSankeyCompare();
 
