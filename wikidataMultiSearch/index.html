@@ -28,7 +28,7 @@ table td,th{
 <header>
 <h1>wikidataMultiSearch: rechercher une liste d'éléments dans Wikidata</h1>
 <p>
-Cet outil programmé par <a href="http://igm.univ-mlv.fr/~gambette">Philippe Gambette</a> vous permet de chercher une liste de mots dans Wikidata et de récupérer 
+Cet outil sous <a href="https://www.gnu.org/licenses/gpl-3.0.html">licence GPLv3</a> programmé par <a href="http://igm.univ-mlv.fr/~gambette">Philippe Gambette</a> vous permet de chercher une liste de mots dans Wikidata et de récupérer 
 certaines <a href="https://www.wikidata.org/wiki/Wikidata:Database_reports/List_of_properties/all/fr">propriétés Wikidata</a> associées.
 Dans le cas où le mot recherché correspond à plusieurs éléments Wikidata,
 c'est le premier élément Wikidata trouvé avec le plus grand nombre de propriétés remplies, 
@@ -71,7 +71,9 @@ Trop contraignant donc supprimé :
 <br><br>
 -->
 <label for="form-properties"><a href="https://www.wikidata.org/wiki/Wikidata:Database_reports/List_of_properties/all/fr">Propriétés</a> à récupérer pour les éléments à rechercher (séparées par des virgules, sans espace) :</label><br>
-<input type="text" id="form-properties" value="P18,P21,P27,P569">
+<input type="text" id="form-properties" value="P18,P21,P27,P569,P570,P213,P214,P268,P269">
+<br><br>
+<input type="checkbox" checked id="form-wikipedia" value="wikipedia"><label for="form-wikipedia">Inclure l'URL de la page Wikipédia de l'élément si elle existe</label><br>
 <br><br>
 <input type="button" id="form-button" value="Rechercher les éléments dans Wikidata !">
 </section>
@@ -85,6 +87,24 @@ Trop contraignant donc supprimé :
 
 </body>
 <script type="text/javascript">
+/*
+    wikidataMultiSearch, a web tool to search for a list of elements on Wikidata
+    Copyright (C) 2020-2021  Philippe Gambette
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 var elements = [];
 var properties = [];
 
@@ -95,7 +115,7 @@ $("#demo-autrices").on("click",function(e){
    $("#form-list").val("George Sand\nMarguerite de Navarre\nMarie de France\nMarguerite Duras\nOlympe de Gouges\nMarie-Catherine de Villedieu");
    $("#form-lang").val("fr");
    $("#form-instanceOf").val("Q5");
-   $("#form-properties").val("P18,P21,P27,P569");
+   $("#form-properties").val("P18,P21,P27,P569,P570,P213,P214,P268,P269");
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
 });
@@ -133,6 +153,10 @@ $("#form-button").on("click",function(){
    $("#results").html("<tr></tr>");
    properties = $("#form-properties").val().split(",");
    $("#results tr").append("<th>élément</th><th>élément dans Wikidata</th><th>Nom d'élément selon Wikidata</th>");
+   // Look for Wikipedia page if required
+   if($("#form-wikipedia").prop("checked")){
+      $("#results tr").append("<th>Wikipedia</th>");
+   }   
    properties.forEach(function(e){
       $("#results tr").append("<th>"+e+"</th><th>label("+e+")</th>");
    })
@@ -151,9 +175,16 @@ function sendNextQuery(){
     var focus = '  {?item rdfs:label "' + elements[0] + '"@' + $("#form-lang").val() + '} ' + 
     ' UNION {?item skos:altLabel "' + elements[0] + '"@' + $("#form-lang").val() + '}'
     if($('input[name="form-type"]:checked').val()=="id"){
-       variables = "?itemlabel";
+       variables = "?item ?itemlabel";
        subject = 'wd:' + elements[0].replace("http://www.wikidata.org/entity/","");
-       focus = '  '+subject+' rdfs:label ?itemlabel filter (lang(?itemlabel) = "fr")';
+       focus = '  VALUES ?item {' + subject + '}.\n' + 
+       '  ?item rdfs:label ?itemlabel filter (lang(?itemlabel) = "' + $("#form-lang").val() + '")';
+    }
+    // Look for Wikipedia page if required
+    if($("#form-wikipedia").prop("checked")){
+       variables += " ?wikipedia";
+       focus +=  '.\n' +
+        '  ?wikipedia schema:about ?item ; schema:isPartOf <https://'+ $("#form-lang").val() + '.wikipedia.org/>';
     }
     var constraints = ' WHERE {\n' + focus
     //.\n'+
@@ -203,8 +234,14 @@ function getWikidataResults(data){
 	      elementInfos["item"] = {"value":elements[0]};
 	      elementInfos["itemLabel"] = elementInfos["itemlabel"];
 	    }
-	    
+	    if(elementInfos["item"].value.substring(0,1) == "Q"){
+	       elementInfos["item"].value = "http://www.wikidata.org/entity/" + elementInfos["item"].value;
+	    }
 	    var tempResultLine = "<td>" + elementInfos["item"].value + "</td><td>" + elementInfos["itemLabel"].value + "</td>";
+      // Look for Wikipedia page if required
+      if($("#form-wikipedia").prop("checked")){
+         tempResultLine += "<td>" + elementInfos["wikipedia"].value + "</td>";
+      }
       properties.forEach(function(e){
         if(elementInfos[e] != undefined){
           if(elementInfos[e].value.replace("http://commons.wikimedia.org","").length < elementInfos[e].value.length){
