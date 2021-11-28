@@ -237,10 +237,18 @@ function getWikidataResults(data){
 	    if(elementInfos["item"].value.substring(0,1) == "Q"){
 	       elementInfos["item"].value = "http://www.wikidata.org/entity/" + elementInfos["item"].value;
 	    }
-	    var tempResultLine = "<td>" + elementInfos["item"].value + "</td><td>" + elementInfos["itemLabel"].value + "</td>";
+	    var tempResultLine = '<td><a href="' + elementInfos["item"].value + '" target="_blank">' 
+        + elementInfos["item"].value 
+        + '</a></td><td>' 
+        + elementInfos["itemLabel"].value 
+        + "</td>";
       // Look for Wikipedia page if required
       if($("#form-wikipedia").prop("checked")){
-         tempResultLine += "<td>" + elementInfos["wikipedia"].value + "</td>";
+        if ( elementInfos["wikipedia"] != undefined){
+          tempResultLine += '<td><a href="' + elementInfos["wikipedia"].value + '" target="_blank">' + elementInfos["wikipedia"].value + '</a></td>';
+        } else {
+          tempResultLine += "<td></td>";
+        }
       }
       properties.forEach(function(e){
         if(elementInfos[e] != undefined){
@@ -306,7 +314,11 @@ $("#download").on("click",function(e){
   $("tr").each(function(n) {
      var dString = "";
      $(this).find("td,th").each(function(td){
-        dString += $(this).html().replace(/\t/ig,"") + "\t";
+      var selector = $(this);
+      if($(this).find("a").length > 0){
+          selector = $(this).find("a");
+        }        
+        dString += selector.html().replace(/\t/ig,"") + "\t";
      });
      csvContent += dString + '\n';
   });
