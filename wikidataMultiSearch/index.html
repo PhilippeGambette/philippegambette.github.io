@@ -184,7 +184,7 @@ function sendNextQuery(){
     if($("#form-wikipedia").prop("checked")){
        variables += " ?wikipedia";
        focus +=  '.\n' +
-        '  ?wikipedia schema:about ?item ; schema:isPartOf <https://'+ $("#form-lang").val() + '.wikipedia.org/>';
+        '  OPTIONAL {?wikipedia schema:about ?item ; schema:isPartOf <https://'+ $("#form-lang").val() + '.wikipedia.org/>}';
     }
     var constraints = ' WHERE {\n' + focus
     //.\n'+
