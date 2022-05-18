@@ -40,10 +40,14 @@ parmi celles souhaitées, qui sera fourni en réponse.
 <h2>Démonstration</h2>
 Cliquez sur les liens ci-dessous pour voir quelques exemples de recherches possibles avec cet outil :
 <ul>
+<li>par nom ou alias :
+<ul>
 <li><a href="" id="demo-autrices">Femmes de lettres</a></li>
 <li><a href="" id="demo-substances">Substances chimiques</a></li>
 <li><a href="" id="demo-ouvrages">Titres d'ouvrages</a></li>
-<li><a href="" id="demo-champs">Identifiants Wikidata de communes appelées Champs en France</a></li>
+</ul></li>
+<li>par identifiant Wikidata : <a href="" id="demo-champs">identifiants Wikidata de communes appelées Champs en France</a></li>
+<li>par lien wiki : <a href="" id="demo-wikisource">liens Wikisource de pièces de théâtre</a></li>
 </ul>
 </section>
 
@@ -58,8 +62,9 @@ Olympe de Gouges
 Marie-Catherine de Villedieu</textarea>
 <br><br>
 Chercher :<br>
-<input type="radio" name="form-type" id="form-id" value="id"><label for="form-id">par identifiant</form>
 <input type="radio" name="form-type" id="form-nom" value="nom" checked><label for="form-nom">par nom ou alias</form>
+<input type="radio" name="form-type" id="form-id" value="id"><label for="form-id">par identifiant</form>
+<input type="radio" name="form-type" id="form-wiki" value="wiki"><label for="form-wiki">par lien wiki (Wikipédia, Wikisource, etc.)</form>
 <br><br>
 <label for="form-lang">Code de langue des éléments à rechercher :</label><br>
 <input type="text" id="form-lang" value="fr">
@@ -118,6 +123,7 @@ $("#demo-autrices").on("click",function(e){
    $("#form-properties").val("P18,P21,P27,P569,P570,P213,P214,P268,P269");
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
+   $("#form-wiki").prop("checked",false);
 });
 
 $("#demo-substances").on("click",function(e){
@@ -128,6 +134,7 @@ $("#demo-substances").on("click",function(e){
    $("#form-properties").val("P231,P274,P661,P662");
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
+   $("#form-wiki").prop("checked",false);
 });
 
 $("#demo-ouvrages").on("click",function(e){
@@ -138,6 +145,7 @@ $("#demo-ouvrages").on("click",function(e){
    $("#form-properties").val("P50,P123,P291,P407,P577,P268,P996,P4258");
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
+   $("#form-wiki").prop("checked",false);
 });
 
 $("#demo-champs").on("click",function(e){
@@ -147,6 +155,17 @@ $("#demo-champs").on("click",function(e){
    $("#form-properties").val("P625,P17,P18,P281,P856,P268,P1566");
    $("#form-id").prop("checked",true);
    $("#form-nom").prop("checked",false);
+   $("#form-wiki").prop("checked",false);
+});
+
+$("#demo-wikisource").on("click",function(e){
+   e.preventDefault();
+   $("#form-list").val("https://fr.wikisource.org/wiki/La_Triomphatrice\nhttps://fr.wikisource.org/wiki/Les_Affranchis\nhttps://fr.wikisource.org/wiki/La_Paix_(Lenéru)\nhttps://fr.wikisource.org/wiki/Garden-party_élyséenne\nhttps://fr.wikisource.org/wiki/Les_Amazones_(Du_Bocage)\nhttps://fr.wikisource.org/wiki/Les_Amazones_(Du_Bocage)/Les_Amazones\nhttps://fr.wikisource.org/wiki/L’Endymion\nhttps://fr.wikisource.org/wiki/La_Mort_de_César_(Barbier)\nhttps://fr.wikisource.org/wiki/Tomyris\nhttps://fr.wikisource.org/wiki/Œuvres_inédites_(Staël)/Tome_II/Agar_dans_le_désert");
+   $("#form-lang").val("fr");
+   $("#form-properties").val("P50,P1476,P123,P291,P407,P577,P268,P996,P4258,P675,P724,P1957");
+   $("#form-id").prop("checked",false);
+   $("#form-nom").prop("checked",false);
+   $("#form-wiki").prop("checked",true);
 });
 
 $("#form-button").on("click",function(){
@@ -174,18 +193,29 @@ function sendNextQuery(){
     var subject = "?item";
     var focus = '  {?item rdfs:label "' + elements[0] + '"@' + $("#form-lang").val() + '} ' + 
     ' UNION {?item skos:altLabel "' + elements[0] + '"@' + $("#form-lang").val() + '}'
+    
+    // Search by id
     if($('input[name="form-type"]:checked').val()=="id"){
        variables = "?item ?itemlabel";
        subject = 'wd:' + elements[0].replace("http://www.wikidata.org/entity/","");
        focus = '  VALUES ?item {' + subject + '}.\n' + 
        '  ?item rdfs:label ?itemlabel filter (lang(?itemlabel) = "' + $("#form-lang").val() + '")';
     }
+    
+    // Search by wiki URL
+    if($('input[name="form-type"]:checked').val()=="wiki"){
+       variables = "?item ?itemlabel";
+       focus = '<' + encodeURI(elements[0]) + '> schema:about ?item.\n' + 
+       '  ?item rdfs:label ?itemlabel filter (lang(?itemlabel) = "' + $("#form-lang").val() + '")';
+    }
+    
     // Look for Wikipedia page if required
     if($("#form-wikipedia").prop("checked")){
        variables += " ?wikipedia";
        focus +=  '.\n' +
         '  OPTIONAL {?wikipedia schema:about ?item ; schema:isPartOf <https://'+ $("#form-lang").val() + '.wikipedia.org/>}';
     }
+    
     var constraints = ' WHERE {\n' + focus
     //.\n'+
     //'  ?item wdt:P31/wdt:P279* wd:' + $("#form-instanceOf").val();
