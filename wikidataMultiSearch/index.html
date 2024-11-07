@@ -48,6 +48,7 @@ Cliquez sur les liens ci-dessous pour voir quelques exemples de recherches possi
 </ul></li>
 <li>par identifiant Wikidata : <a href="" id="demo-champs">identifiants Wikidata de communes appelées Champs en France</a></li>
 <li>par lien wiki : <a href="" id="demo-wikisource">liens Wikisource de pièces de théâtre</a></li>
+<li>par valeur pour une propriété donnée : <a href="" id="demo-prop">identifiants IMDB d'une liste de films sortis en 2021</a></li>
 </ul>
 </section>
 
@@ -65,7 +66,8 @@ Chercher :<br>
 <input type="radio" name="form-type" id="form-nom" value="nom" checked><label for="form-nom">par nom ou alias</form>
 <input type="radio" name="form-type" id="form-id" value="id"><label for="form-id">par identifiant</form>
 <input type="radio" name="form-type" id="form-wiki" value="wiki"><label for="form-wiki">par lien wiki (Wikipédia, Wikisource, etc.)</form>
-<br><br>
+<input type="radio" name="form-type" id="form-prop" value="prop"><label for="form-prop">par valeur pour la propriété <input type="text" id="form-prop-value" value="P345"></form>
+  <br><br>
 <label for="form-lang">Code de langue des éléments à rechercher :</label><br>
 <input type="text" id="form-lang" value="fr">
 <br><br>
@@ -94,7 +96,7 @@ Trop contraignant donc supprimé :
 <script type="text/javascript">
 /*
     wikidataMultiSearch, a web tool to search for a list of elements on Wikidata
-    Copyright (C) 2020-2021  Philippe Gambette
+    Copyright (C) 2020-2024  Philippe Gambette
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -135,6 +137,7 @@ $("#demo-substances").on("click",function(e){
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
    $("#form-wiki").prop("checked",false);
+   $("#form-prop").prop("checked",false);
 });
 
 $("#demo-ouvrages").on("click",function(e){
@@ -146,6 +149,7 @@ $("#demo-ouvrages").on("click",function(e){
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",true);
    $("#form-wiki").prop("checked",false);
+   $("#form-prop").prop("checked",false);
 });
 
 $("#demo-champs").on("click",function(e){
@@ -156,7 +160,20 @@ $("#demo-champs").on("click",function(e){
    $("#form-id").prop("checked",true);
    $("#form-nom").prop("checked",false);
    $("#form-wiki").prop("checked",false);
+   $("#form-prop").prop("checked",false);
 });
+
+$("#demo-prop").on("click",function(e){
+   e.preventDefault();
+   $("#form-list").val("tt9770150\ntt13150590\ntt4292432\ntt8132778");
+   $("#form-lang").val("fr");
+   $("#form-properties").val("P1476,P136,P577,P495,P57,P58,P2047,P1265");
+   $("#form-id").prop("checked",false);
+   $("#form-nom").prop("checked",false);
+   $("#form-wiki").prop("checked",false);
+   $("#form-prop").prop("checked",true);
+   $("#form-prop-value").val("P345");
+  });
 
 $("#demo-wikisource").on("click",function(e){
    e.preventDefault();
@@ -166,7 +183,8 @@ $("#demo-wikisource").on("click",function(e){
    $("#form-id").prop("checked",false);
    $("#form-nom").prop("checked",false);
    $("#form-wiki").prop("checked",true);
-});
+   $("#form-prop").prop("checked",false);
+  });
 
 $("#form-button").on("click",function(){
    $("#results").html("<tr></tr>");
@@ -207,6 +225,15 @@ function sendNextQuery(){
        variables = "?item ?itemlabel";
        focus = '<' + encodeURI(elements[0]) + '> schema:about ?item.\n' + 
        '  ?item rdfs:label ?itemlabel filter (lang(?itemlabel) = "' + $("#form-lang").val() + '")';
+    }
+
+    // Search by property
+    if($('input[name="form-type"]:checked').val()=="prop"){
+       variables = "?item ?itemlabel";
+       subject = elements[0];
+       focus = ' ?item wdt:' + $("#form-prop-value").val() + ' "' + subject + '".\n' + 
+       '  ?item rdfs:label ?itemlabel filter (lang(?itemlabel) = "' + $("#form-lang").val() + '")';
+       subject = '?item';
     }
     
     // Look for Wikipedia page if required
